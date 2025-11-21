@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: gestorTareas
+    env: docker
+    region: frankfurt
+    plan: free
+    envVars:
+      - key: APP_KEY
+        sync: false
+      - key: APP_DEBUG
+        value: true
+      - key: APP_ENV
+        value: production
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

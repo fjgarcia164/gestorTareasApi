@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si la solicitud NO es un archivo ni un directorio real
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+
+    # Envía la solicitud a index.php (el Front Controller de Laravel)
+    RewriteRule ^ index.php [L]
+</IfModule>
