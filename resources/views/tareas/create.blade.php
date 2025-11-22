@@ -6,13 +6,24 @@
         <h4 class="mb-0">Nueva Tarea</h4>
     </div>
     <div class="card-body">
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <strong>¡Vaya! Algo salió mal:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <form action="{{ route('tareas.store') }}" method="POST">
             @csrf 
 
             <div class="row">
                 <div class="col-md-8 mb-3">
                     <label class="form-label">Título</label>
-                    <input type="text" name="titulo" class="form-control" required>
+                    <input type="text" name="titulo" class="form-control" value="{{ old('titulo') }}" required>
                 </div>
 
                 <div class="col-md-4 mb-3">
@@ -27,12 +38,12 @@
 
                 <div class="col-12 mb-3">
                     <label class="form-label">Descripción</label>
-                    <textarea name="descripcion" class="form-control" rows="3"></textarea>
+                    <textarea name="descripcion" class="form-control" rows="3">{{ old('descripcion') }}</textarea>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Fecha Vencimiento</label>
-                    <input type="date" name="fecha_vencimiento" class="form-control">
+                    <input type="date" name="fecha_vencimiento" class="form-control" value="{{ old('fecha_vencimiento') }}">
                 </div>
 
                 <div class="col-md-6 mb-3">

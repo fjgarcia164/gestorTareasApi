@@ -2,16 +2,9 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Mis Tareas</h2>
+    <h2>Mis Tareas (Cargadas vía API)</h2>
     <a href="{{ route('tareas.create') }}" class="btn btn-primary">+ Nueva Tarea</a>
 </div>
-
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -26,61 +19,108 @@
                     <th class="text-end">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach($tareas as $tarea)
-                <tr>
-                    <td class="fw-bold">{{ $tarea->titulo }}</td>
-                    
-                    <td>
-                        <span class="badge bg-info text-dark">{{ $tarea->categoria->nombre ?? 'Sin Categ.' }}</span>
-                    </td>
-                    
-                    <td>{{ $tarea->fecha_vencimiento ?? '—' }}</td>
-                    
-                    <td>
-                        @if($tarea->prioridad == 'alta') 
-                            <span class="badge bg-danger">Alta</span>
-                        @elseif($tarea->prioridad == 'media') 
-                            <span class="badge bg-warning text-dark">Media</span>
-                        @else 
-                            <span class="badge bg-success">Baja</span>
-                        @endif
-                    </td>
-                    
-                    <td>
-                        {{ ucfirst(str_replace('_', ' ', $tarea->estado)) }}
-                    </td>
-                    
-                    <td class="text-end">
-                        <div class="btn-group" role="group">
-                            <a href="{{ route('tareas.show', $tarea->id) }}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
-                                Ver
-                            </a>
-                            
-                            <a href="{{ route('tareas.edit', $tarea->id) }}" class="btn btn-sm btn-outline-secondary" title="Editar">
-                                Editar
-                            </a>
-
-                            <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta tarea?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                    X
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
+            <tbody id="contenedor-tareas">
+                </tbody>
         </table>
         
-        @if($tareas->isEmpty())
-            <div class="text-center p-5 text-muted">
-                <h4>No tienes tareas pendientes</h4>
-                <p>¡Crea una nueva para empezar a organizarte!</p>
+        <div id="loading" class="text-center p-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
             </div>
-        @endif
+            <p class="mt-2 text-muted">Cargando datos de la API...</p>
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarTareas();
+    });
+
+    function cargarTareas() {
+        fetch('/api/tareas')
+            .then(response => response.json()) 
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                const tbody = document.getElementById('contenedor-tareas');
+                tbody.innerHTML = ''; 
+                
+                if(data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center p-4">No hay tareas (API vacía)</td></tr>';
+                    return;
+                }
+
+                data.forEach(tarea => {
+                    const fila = `
+                        <tr>
+                            <td class="fw-bold">${tarea.titulo}</td>
+                            <td>
+                                <span class="badge bg-info text-dark">
+                                    ${tarea.categoria ? tarea.categoria.nombre : 'Sin Categ.'}
+                                </span>
+                            </td>
+                            <td>${tarea.fecha_vencimiento || '—'}</td>
+                            <td>
+                                <span class="badge ${getPrioridadColor(tarea.prioridad)}">
+                                    ${tarea.prioridad.toUpperCase()}
+                                </span>
+                            </td>
+                            <td>${tarea.estado}</td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    <a href="/tareas/${tarea.id}" class="btn btn-sm btn-outline-primary">
+                                        Ver
+                                    </a>
+                                    
+                                    <a href="/tareas/${tarea.id}/edit" class="btn btn-sm btn-outline-secondary">
+                                        Editar
+                                    </a>
+
+                                    <button onclick="borrarTarea(${tarea.id})" class="btn btn-sm btn-outline-danger">
+                                        Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += fila;
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading').innerHTML = '<p class="text-danger">Error al cargar la API</p>';
+            });
+    }
+
+    function borrarTarea(id) {
+        if(!confirm('¿Estás seguro de que quieres borrar esta tarea?')) return;
+
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch(`/api/tareas/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token
+            }
+        })
+        .then(response => {
+            if(response.ok) {
+                alert('Tarea eliminada correctamente');
+                
+                document.getElementById('loading').style.display = 'block';
+                cargarTareas(); 
+            } else {
+                alert('Hubo un error al borrar la tarea');
+            }
+        })
+        .catch(error => console.error('Error al borrar:', error));
+    }
+
+    function getPrioridadColor(prioridad) {
+        if(prioridad === 'alta') return 'bg-danger';
+        if(prioridad === 'media') return 'bg-warning text-dark';
+        return 'bg-success';
+    }
+</script>
 @endsection
