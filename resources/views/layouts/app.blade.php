@@ -7,11 +7,10 @@
 
     <title>{{ config('app.name', 'Gestor de Tareas API') }}</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; }
-        .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+<link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/vapor/bootstrap.min.css" rel="stylesheet">
+<style>
+        body { background-color: #fdfdfe; }
+        .card { border: none; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body>
