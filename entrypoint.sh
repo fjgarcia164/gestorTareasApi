@@ -1,11 +1,13 @@
 #!/bin/bash
 
-# Este script ya no ejecuta la migración/seeding (Se hará a mano)
 set -e
 
-# 1. Limpia Caché (Esencial para evitar errores 404 de rutas)
+# 1. Limpia Caché 
 php artisan route:clear
 php artisan config:clear
+php artisan view:clear
+php artisan migrate --force
 
-# 2. Comando de arranque principal (entrega el control al contenedor)
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# 2. Comando de arranque principal
 exec "$@"
