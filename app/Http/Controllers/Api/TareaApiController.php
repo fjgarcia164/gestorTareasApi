@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Tarea;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class TareaApiController extends Controller
 {
     // GET
+  // GET /api/tareas
     public function index()
     {
-        $tareas = Tarea::with('categoria')->get();
+       
+        $tareas = Tarea::where('creador_id', Auth::id())
+                        ->with('categoria')
+                        ->get();
+
         return response()->json($tareas, 200);
     }
 
