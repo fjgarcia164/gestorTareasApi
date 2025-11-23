@@ -19,7 +19,7 @@ Route::get('/categorias', function () {
 });
 
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('web', 'auth')->group(function () {
 
     Route::apiResource('tareas', TareaApiController::class)
          ->names('api.tareas');

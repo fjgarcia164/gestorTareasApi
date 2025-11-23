@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 class TareaApiController extends Controller
 {
-    // GET
-  // GET /api/tareas
     public function index()
     {
        
